@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    meta.helm.sh/release-name: cilium
+    meta.helm.sh/release-namespace: kube-system
+  creationTimestamp: "2025-09-30T04:07:26Z"
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: hubble-ui
+    app.kubernetes.io/part-of: cilium
+    k8s-app: hubble-ui
+  name: hubble-ui
+  namespace: kube-system
+  resourceVersion: "7479"
+  uid: acda0153-5de4-406f-9768-25e2a4483da8
+spec:
+  clusterIP: 10.105.126.160
+  clusterIPs:
+  - 10.105.126.160
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: http
+    nodePort: 30000
+    port: 80
+    protocol: TCP
+    targetPort: 8081
+  selector:
+    k8s-app: hubble-ui
+  sessionAffinity: None
+  type: NodePort
+status:
+  loadBalancer: {}
