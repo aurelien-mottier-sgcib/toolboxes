@@ -317,13 +317,10 @@ spec:
 * https://yum.oracle.com/repo/OracleLinux/OL9/developer/EPEL/x86_64/getPackage/yq-4.47.1-2.el9.x86_64.rpm
 * https://yum.oracle.com/repo/OracleLinux/OL9/baseos/latest/x86_64/getPackage/yum-utils-4.3.0-20.0.1.el9.noarch.rpm
 * https://yum.oracle.com/repo/OracleLinux/OL9/baseos/latest/x86_64/getPackage/zip-3.0-35.el9.x86_64.rpm
-* 
-- cri-tools kubernetes-cni cri-o
-* 
-- libnetfilter_cthelper libnetfilter_cttimeout libnetfilter_queue conntrack-tools kubelet kubectl kubeadm helm
-* 
-- cilium CLI: https://github.com/cilium/cilium-cli/releases/download/v0.18.7/cilium-linux-amd64.tar.gz
-- hubble CLI: https://github.com/cilium/hubble/releases/download/v1.18.0/hubble-linux-amd64.tar.gz
+* cri-tools kubernetes-cni cri-o
+* libnetfilter_cthelper libnetfilter_cttimeout libnetfilter_queue conntrack-tools kubelet kubectl kubeadm helm
+* cilium CLI: https://github.com/cilium/cilium-cli/releases/download/v0.18.7/cilium-linux-amd64.tar.gz
+* hubble CLI: https://github.com/cilium/hubble/releases/download/v1.18.0/hubble-linux-amd64.tar.gz
 
 # Configuration files or systemd
 * /etc/crio/crio.conf (cgroup_manager + pause_image="registry.k8s.io/pause:3.10")
