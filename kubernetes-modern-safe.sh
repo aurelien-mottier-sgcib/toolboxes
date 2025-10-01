@@ -307,7 +307,16 @@ spec:
 
 
 # RPM URLs
-- crun htop jq openssl wget yq yum-utils zip
+* https://yum.oracle.com/repo/OracleLinux/OL9/appstream/x86_64/getPackage/crun-1.23.1-2.el9_6.x86_64.rpm
+* https://yum.oracle.com/repo/OracleLinux/OL9/developer/EPEL/x86_64/getPackage/htop-3.3.0-1.el9.x86_64.rpm
+* https://yum.oracle.com/repo/OracleLinux/OL9/baseos/latest/x86_64/getPackage/jq-1.6-17.el9.x86_64.rpm
+* https://yum.oracle.com/repo/OracleLinux/OL9/appstream/x86_64/getPackage/xmlsec1-openssl-1.2.29-13.el9.x86_64.rpm
+* https://yum.oracle.com/repo/OracleLinux/OL9/baseos/latest/x86_64/getPackage/openssl-3.2.2-6.0.1.el9_5.1.x86_64.rpm
+* https://yum.oracle.com/repo/OracleLinux/OL9/baseos/latest/x86_64/getPackage/openssl-libs-3.2.2-6.0.1.el9_5.1.x86_64.rpm
+* https://yum.oracle.com/repo/OracleLinux/OL9/appstream/x86_64/getPackage/wget-1.21.1-8.el9_4.x86_64.rpm
+* https://yum.oracle.com/repo/OracleLinux/OL9/developer/EPEL/x86_64/getPackage/yq-4.47.1-2.el9.x86_64.rpm
+* https://yum.oracle.com/repo/OracleLinux/OL9/baseos/latest/x86_64/getPackage/yum-utils-4.3.0-20.0.1.el9.noarch.rpm
+* https://yum.oracle.com/repo/OracleLinux/OL9/baseos/latest/x86_64/getPackage/zip-3.0-35.el9.x86_64.rpm
 * 
 - cri-tools kubernetes-cni cri-o
 * 
