@@ -1,0 +1,158 @@
+# PRE-REQUISITES
+* hwloc-libs before htop (no harm since this lib is in baseos)
+* no issue for the other ones
+* podman is part of cri?
+
+# KUBE
+[root@nano Downloads]# kubeadm config images pull
+[config/images] Pulled registry.k8s.io/kube-apiserver:v1.34.1
+[config/images] Pulled registry.k8s.io/kube-controller-manager:v1.34.1
+[config/images] Pulled registry.k8s.io/kube-scheduler:v1.34.1
+[config/images] Pulled registry.k8s.io/kube-proxy:v1.34.1
+[config/images] Pulled registry.k8s.io/coredns/coredns:v1.12.1
+[config/images] Pulled registry.k8s.io/pause:3.10.1
+[config/images] Pulled registry.k8s.io/etcd:3.6.4-0
+
+podman tag registry.k8s.io/kube-apiserver:v1.34.1 localhost/my-registry/kube-apiserver:v1.34.1
+podman tag registry.k8s.io/kube-controller-manager:v1.34.1 localhost/my-registry/kube-controller-manager:v1.34.1
+podman tag registry.k8s.io/kube-scheduler:v1.34.1 localhost/my-registry/kube-scheduler:v1.34.1
+podman tag registry.k8s.io/kube-proxy:v1.34.1 localhost/my-registry/kube-proxy:v1.34.1
+podman tag registry.k8s.io/coredns/coredns:v1.12.1 localhost/my-registry/coredns/coredns:v1.12.1
+podman tag registry.k8s.io/etcd:3.6.4-0 localhost/my-registry/etcd:3.6.4-0
+podman tag registry.k8s.io/pause:3.10.1 localhost/my-registry/pause:3.10.1
+
+podman tag localhost/my-registry/coredns/coredns:v1.12.1 localhost/my-registry/coredns:v1.12.1
+podman rmi localhost/my-registry/coredns/coredns:v1.12.1
+
+podman rmi registry.k8s.io/kube-apiserver:v1.34.1
+podman rmi registry.k8s.io/kube-controller-manager:v1.34.1
+podman rmi registry.k8s.io/kube-scheduler:v1.34.1
+podman rmi registry.k8s.io/kube-proxy:v1.34.1
+podman rmi registry.k8s.io/coredns/coredns:v1.12.1
+podman rmi registry.k8s.io/pause:3.10.1
+podman rmi registry.k8s.io/etcd:3.6.4-0
+
+crictl images
+
+edit crio conf + daemon-reload + restart crio service
+
+kubeadm init --skip-phases=addon/kube-proxy --pod-network-cidr=192.168.88.0/24 --image-repository=localhost/my-registry
+
+###################
+
+exit (go back to aurel/temaprd001)
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+  
+kubectl get pods -A
+
+
+#################
+
+podman pull quay.io/cilium/cilium:v1.18.2
+podman pull quay.io/cilium/operator-generic:v1.18.2
+podman pull quay.io/cilium/cilium-envoy@sha256:946dcd9e525b644f13a7158c3bafca7d9e901209ceb2833934e73311fab84c76
+podman pull quay.io/cilium/hubble-relay:v1.18.2
+podman pull quay.io/cilium/hubble-ui:v0.13.3
+podman pull quay.io/cilium/hubble-ui-backend:v0.13.3
+
+podman tag quay.io/cilium/cilium:v1.18.2 localhost/my-registry/cilium:v1.18.2
+podman tag quay.io/cilium/operator-generic:v1.18.2 localhost/my-registry/cilium-operator:v1.18.2
+podman tag quay.io/cilium/cilium-envoy@sha256:946dcd9e525b644f13a7158c3bafca7d9e901209ceb2833934e73311fab84c76 localhost/my-registry/cilium-envoy:v1.18.2
+podman tag quay.io/cilium/hubble-relay:v1.18.2 localhost/my-registry/hubble-relay:v1.18.2
+podman tag quay.io/cilium/hubble-ui:v0.13.3 localhost/my-registry/hubble-ui:v0.13.3
+podman tag quay.io/cilium/hubble-ui-backend:v0.13.3 localhost/my-registry/hubble-ui-backend:v0.13.3
+
+podman rmi quay.io/cilium/cilium:v1.18.2
+podman rmi quay.io/cilium/operator-generic:v1.18.2
+podman rmi quay.io/cilium/cilium-envoy@sha256:946dcd9e525b644f13a7158c3bafca7d9e901209ceb2833934e73311fab84c76
+podman rmi quay.io/cilium/hubble-relay:v1.18.2
+podman rmi quay.io/cilium/hubble-ui:v0.13.3
+podman rmi quay.io/cilium/hubble-ui-backend:v0.13.3
+podman rmi quay.io/cilium/cilium-envoy:latest
+
+podman images
+
+#################
+
+git clone https://github.com/cilium/cilium.git
+
+cd cilium
+
+git checkout v1.18.2
+
+#################
+
+(disconnect from network)
+
+#################
+
+# Based on https://docs.cilium.io/en/stable/helm-reference/
+
+helm upgrade --install cilium ./install/kubernetes/cilium \
+--wait \
+--namespace kube-system \
+--set cluster.name=$(kubectl config view | yq .clusters.[0].name | xargs) \
+--set nodeinit.enabled=false \
+--set bpf.masquerade=true \
+--set bpf.monitorAggregation=medium \
+--set bpf.monitorInterval=10s \
+--set ipam.mode=kubernetes \
+--set ipam.operator.clusterPoolIPv4PodCIDRList=["192.168.88.0/24"] \
+--set ipv4.enabled=true \
+--set enableIPv4Masquerade=true \
+--set ipv6.enabled=false \
+--set enableIPv6Masquerade=false \
+--set routingMode=tunnel \
+--set tunnelProtocol=vxlan \
+--set k8sServiceHost=$(kubectl describe node nano | grep "InternalIP:" | cut -d":" -f2 | xargs) \
+--set k8sServicePort=$(kubectl describe pod -n kube-system $(kubectl get pods -n kube-system | grep "kube-apiserver" | cut -d" " -f1 | xargs) | grep "Host Port:" | cut -d":" -f2 | cut -d"/" -f1 | xargs) \
+--set kubeProxyReplacement=true \
+--set operator.replicas=1 \
+--set hubble.enabled=true \
+--set hubble.preferIpv6=false \
+--set hubble.relay.enabled=true \
+--set hubble.relay.replicas=1 \
+--set hubble.relay.service.type=ClusterIP \
+--set hubble.ui.enabled=true \
+--set hubble.ui.replicas=1 \
+--set hubble.ui.service.type=NodePort \
+--set hubble.ui.service.nodePort=30000 \
+--set hubble.ui.frontend.server.ipv6.enabled=false \
+--set image.repository=localhost/my-registry/cilium \
+--set image.tag=v1.18.2 \
+--set image.pullPolicy=IfNotPresent \
+--set image.useDigest=false \
+--set preflight.image.repository=localhost/my-registry/cilium \
+--set preflight.image.tag=v1.18.2 \
+--set preflight.image.pullPolicy=IfNotPresent \
+--set preflight.image.useDigest=false \
+--set operator.image.repository=localhost/my-registry/cilium-operator \
+--set operator.image.tag=v1.18.2 \
+--set operator.image.pullPolicy=IfNotPresent \
+--set operator.image.useDigest=false \
+--set envoy.image.repository=localhost/my-registry/cilium-envoy \
+--set envoy.image.tag=v1.18.2 \
+--set envoy.image.pullPolicy=IfNotPresent \
+--set envoy.image.useDigest=false \
+--set preflight.envoy.image.repository=localhost/my-registry/cilium-envoy \
+--set preflight.envoy.image.tag=v1.18.2 \
+--set preflight.envoy.image.pullPolicy=IfNotPresent \
+--set preflight.envoy.image.useDigest=false \
+--set hubble.relay.image.repository=localhost/my-registry/hubble-relay \
+--set hubble.relay.image.tag=v1.18.2 \
+--set hubble.relay.image.pullPolicy=IfNotPresent \
+--set hubble.relay.image.useDigest=false \
+--set hubble.ui.frontend.image.repository=localhost/my-registry/hubble-ui \
+--set hubble.ui.frontend.image.tag=v0.13.3 \
+--set hubble.ui.frontend.image.pullPolicy=IfNotPresent \
+--set hubble.ui.frontend.image.useDigest=false \
+--set hubble.ui.backend.image.repository=localhost/my-registry/hubble-ui-backend \
+--set hubble.ui.backend.image.tag=v0.13.3 \
+--set hubble.ui.backend.image.pullPolicy=IfNotPresent \
+--set hubble.ui.backend.image.useDigest=false
+
+cilium status --wait
+
